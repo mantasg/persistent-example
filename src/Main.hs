@@ -36,6 +36,7 @@ main = runSqlite ":memory:" $ do
     runMigration migrateAll
     
     insert $ Person "Michael" "Snoyman" 26
+    insert $ Person "Another" "Guy" 100
     michael <- getBy $ PersonName "Michael" "Snoyman"
     liftIO $ print michael
     
@@ -44,6 +45,9 @@ main = runSqlite ":memory:" $ do
     
     maybePerson <- getBy $ PersonName "Michael" "Snoyman"
     liftIO $ print $ "Person by Name = " ++ show maybePerson
+    
+    people <- selectList [PersonAge >. 25] [ Asc PersonAge ]
+    liftIO $ print people
     
     carId <- insert $ Car "Red" "Honda" "Civic"
     car <- get carId
