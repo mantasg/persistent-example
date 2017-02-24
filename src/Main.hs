@@ -39,10 +39,11 @@ main = runSqlite ":memory:" $ do
     michael <- getBy $ PersonName "Michael" "Snoyman"
     liftIO $ print michael
     
+    personById <- get $ PersonKey 1
+    liftIO $ print $ "Person by ID = " ++ show personById
+    
     maybePerson <- getBy $ PersonName "Michael" "Snoyman"
-    case maybePerson of
-      Nothing -> liftIO $ putStrLn "Just kidding, not really there"
-      Just (Entity personId person) -> liftIO $ print person
+    liftIO $ print $ "Person by Name = " ++ show maybePerson
     
     carId <- insert $ Car "Red" "Honda" "Civic"
     car <- get carId
