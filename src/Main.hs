@@ -15,17 +15,27 @@ import           Database.Persist
 import           Database.Persist.Sqlite
 import           Database.Persist.TH
 
-share [mkPersist sqlSettings, mkSave "entityDefs"] [persistLowerCase|
+share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 Person
     name String
     age Int
+    deriving Show
+Car
+    color String
+    make String
+    model String
     deriving Show
 |]
 
 
 main :: IO ()
 main = runSqlite ":memory:" $ do
-    runMigration $ migrate entityDefs $ entityDef (Nothing :: Maybe Person)
+    runMigration migrateAll
+    
     michaelId <- insert $ Person "Michael" 26
     michael <- get michaelId
     liftIO $ print michael
+    
+    carId <- insert $ Car "Red" "Honda" "Civic"
+    car <- get carId
+    liftIO $ print car
