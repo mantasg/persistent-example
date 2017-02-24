@@ -11,8 +11,10 @@
 module Main where
 
 import           Control.Monad.IO.Class  (liftIO)
+import           Control.Monad.Logger    (runStderrLoggingT)
 import           Database.Persist
 import           Database.Persist.Sqlite
+import           Database.Persist.Postgresql
 import           Database.Persist.TH
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
@@ -30,9 +32,8 @@ Car
     deriving Show
 |]
 
-
-main :: IO ()
-main = runSqlite ":memory:" $ do
+withSqlite :: IO ()
+withSqlite = runSqlite ":memory:" $ do
     runMigration migrateAll
     
     insert $ Person "Michael" "Snoyman" 26
@@ -52,3 +53,24 @@ main = runSqlite ":memory:" $ do
     carId <- insert $ Car "Red" "Honda" "Civic"
     car <- get carId
     liftIO $ print car
+
+
+-- In order for get this working you need pg_config in your path
+-- For that you need to download and install posgres locally
+connStr = "host=localhost dbname=postgres user=postgres password=postgres port=5432"
+
+withPostgres :: IO ()
+withPostgres = runStderrLoggingT $ withPostgresqlPool connStr 10 $ \pool -> liftIO $ do
+    flip runSqlPersistMPool pool $ do
+        runMigration migrateAll
+        
+        insert $ Car "Red" "Honda" "Civic"
+        records <- selectList [] [ Asc CarMake ]
+        liftIO $ print records
+        
+        return ()
+
+
+
+main :: IO ()
+main = withPostgres
