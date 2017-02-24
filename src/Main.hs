@@ -17,9 +17,12 @@ import           Database.Persist.TH
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 Person
-    name String
+    firstName String
+    lastName String
     age Int
+    PersonName firstName lastName
     deriving Show
+    
 Car
     color String
     make String
@@ -32,8 +35,8 @@ main :: IO ()
 main = runSqlite ":memory:" $ do
     runMigration migrateAll
     
-    michaelId <- insert $ Person "Michael" 26
-    michael <- get michaelId
+    insert $ Person "Michael" "Snoyman" 26
+    michael <- getBy $ PersonName "Michael" "Snoyman"
     liftIO $ print michael
     
     carId <- insert $ Car "Red" "Honda" "Civic"
